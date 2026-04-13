@@ -128,13 +128,19 @@ export default function Home() {
     setIsCalling(true);
     lastServerErrorRef.current = null;
 
+    // VERY IMPORTANT FOR MOBILE: Create and resume AudioContext SYNCHRONOUSLY before any awaits!
+    const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+    const audioCtx = new AudioContextCtor({ sampleRate: 16000 });
+    audioContextRef.current = audioCtx;
+    
+    // Force resume immediately upon user interaction
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       micStreamRef.current = stream;
-
-      const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
-      const audioCtx = new AudioContextCtor({ sampleRate: 16000 });
-      audioContextRef.current = audioCtx;
       
       nextPlayTimeRef.current = audioCtx.currentTime;
       const source = audioCtx.createMediaStreamSource(stream);
