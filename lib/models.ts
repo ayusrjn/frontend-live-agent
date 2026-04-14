@@ -54,6 +54,26 @@ SupportTicketSchema.set('toJSON', {
   }
 });
 
+const ComplaintSchema = new mongoose.Schema({
+  _id: { type: Number, required: true },
+  user_id: { type: Number, required: true, ref: 'User' },
+  order_id: { type: Number, required: false, ref: 'Order' },
+  category: { type: String, required: true }, // 'food_quality', 'late_delivery', 'missing_items', 'wrong_order', 'hygiene', 'other'
+  description: { type: String, required: true },
+  status: { type: String, default: 'Open' }, // 'Open', 'Resolved', 'Escalated'
+  created_at: { type: Date, default: Date.now },
+});
+
+ComplaintSchema.set('toJSON', {
+  virtuals: true,
+  transform: (doc, ret) => {
+    (ret as any).id = ret._id;
+    delete (ret as any)._id;
+    delete (ret as any).__v;
+  }
+});
+
 export const User = mongoose.models.User || mongoose.model('User', UserSchema);
 export const Order = mongoose.models.Order || mongoose.model('Order', OrderSchema);
 export const SupportTicket = mongoose.models.SupportTicket || mongoose.model('SupportTicket', SupportTicketSchema);
+export const Complaint = mongoose.models.Complaint || mongoose.model('Complaint', ComplaintSchema);
